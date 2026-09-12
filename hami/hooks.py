@@ -42,6 +42,9 @@ app_license = "mit"
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
 
+# Send the POS "Print Receipt" button through QZ Tray for raw ESC/POS formats
+page_js = {"point-of-sale": "public/js/pos_thermal_print.js"}
+
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
