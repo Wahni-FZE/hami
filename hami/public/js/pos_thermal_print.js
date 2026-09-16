@@ -2,10 +2,11 @@
 // HAMI PERFUMES - Thermal Receipt (Raw ESC/POS via QZ Tray)
 //
 // Loaded by hooks.py :: page_js on the Point of Sale page only.
-// Adds a "Thermal Print" button to the POS order summary.
+// Replaces the "Print Receipt" button on the POS order summary with a
+// "Thermal Print" button that sends a raw ESC/POS receipt to the till printer.
 //
-// The standard "Print Receipt" button is NOT touched - it keeps printing the
-// normal ERPNext way.
+// ERPNext's own print_receipt method is not overridden - it just loses its
+// button, so nothing else in POS changes.
 // ============================================================
 
 var RCPT = {
@@ -481,10 +482,11 @@ function rc_patch_pos() {
 	if (S.prototype.__rc_patched) return true;
 	S.prototype.__rc_patched = true;
 
-	// Add a "Thermal Print" button next to Print Receipt.
+	// Replace the "Print Receipt" button with "Thermal Print".
 	// add_summary_btns builds each button from its label and takes the CSS class
-	// from the first word, so "Thermal Print" renders as .thermal-btn - separate
-	// from .print-btn, which keeps its standard handler untouched.
+	// from the first word, so this renders .thermal-btn and no .print-btn at all.
+	// The stock print_receipt method is left intact - it simply has no button, so
+	// the Ctrl+P shortcut finds no .print-btn and quietly does nothing.
 	// get_condition_btn_map runs on every load_summary_of, so patching the
 	// prototype is enough even if the summary instance already exists.
 	var orig_map = S.prototype.get_condition_btn_map;
@@ -494,8 +496,11 @@ function rc_patch_pos() {
 			map.forEach(function (m) {
 				var btns = m.visible_btns || [];
 				var i = btns.indexOf("Print Receipt");
-				if (i !== -1 && btns.indexOf("Thermal Print") === -1) {
-					btns.splice(i + 1, 0, "Thermal Print");
+				if (i === -1) return;
+				if (btns.indexOf("Thermal Print") === -1) {
+					btns.splice(i, 1, "Thermal Print");
+				} else {
+					btns.splice(i, 1);
 				}
 			});
 			return map;
